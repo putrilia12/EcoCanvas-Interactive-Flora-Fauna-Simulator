@@ -16,7 +16,6 @@
 |---|---|
 | **🎮 Play Now** | [EcoCanvas: Plants & Animals Playground](https://putrilia12.github.io/EcoCanvas-Interactive-Flora-Fauna-Simulator/) |
 | **📺 Video Tutorial** | [How to Use Tutorial](https://youtu.be/abFlvIl0AyU) |
-| **👩‍💻 Author LinkedIn** | [Putri Aurelia](https://www.linkedin.com/in/putri-aurelia-728abb342/) |
 
 ---
 
