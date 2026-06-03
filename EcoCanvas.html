@@ -1,0 +1,1450 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EcoCanvas</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    :root { 
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; 
+    }
+    
+    body { 
+      margin: 0; 
+      background: #f6f7fb; 
+      color: #1f2330;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    header { 
+      padding: 12px 16px; 
+      background: white; 
+      border-bottom: 1px solid #e6e8f0;
+      flex-shrink: 0;
+    }
+    
+    header h1 { 
+      margin: 0; 
+      font-size: 16px; 
+    }
+    
+    header p { 
+      margin: 4px 0 0; 
+      font-size: 12px; 
+      color: #5a627a; 
+    }
+
+    .app { 
+      display: grid; 
+      grid-template-columns: 1fr 360px; 
+      gap: 12px; 
+      padding: 12px;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+    
+    .stage { 
+      background: white; 
+      border: 1px solid #e6e8f0; 
+      border-radius: 14px; 
+      padding: 12px; 
+      box-shadow: 0 8px 22px rgba(20,30,60,.06);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    
+    .toolbar-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      appearance: none;
+      border: 1px solid #d7dbeb;
+      background: #fff;
+      border-radius: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    
+    .btn:hover { 
+      background: #f3f5ff; 
+      transform: translateY(-1px);
+    }
+    
+    .btn.primary { 
+      background: #1f5cff; 
+      border-color: #1f5cff; 
+      color: white; 
+    }
+    
+    .btn.primary:hover { 
+      background: #0044cc; 
+    }
+    
+    .btn.danger { 
+      background: #ff3b3b; 
+      border-color: #ff3b3b; 
+      color: white; 
+    }
+    
+    .btn.danger:hover { 
+      background: #cc0000; 
+    }
+    
+    .btn:disabled { 
+      opacity: .6; 
+      cursor: not-allowed; 
+      transform: none;
+    }
+    
+    .canvasWrap { 
+      border: 1px dashed #cfd5eb; 
+      border-radius: 14px; 
+      padding: 10px; 
+      background: #fbfcff; 
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    canvas { 
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 12px;
+      background: #87CEEB;
+      touch-action: none;
+      object-fit: contain;
+      cursor: crosshair;
+    }
+    
+    .hint { 
+      font-size: 11px; 
+      color: #5a627a; 
+      line-height: 1.4;
+      flex-shrink: 0;
+      text-align: center;
+      padding: 6px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    
+    .kbd {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid #d7dbeb;
+      background: #fff;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    
+    .panel { 
+      background: white; 
+      border: 1px solid #e6e8f0; 
+      border-radius: 14px; 
+      padding: 12px; 
+      box-shadow: 0 8px 22px rgba(20,30,60,.06);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+    
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    
+    .panel h2 { 
+      margin: 0 0 8px 0; 
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    .panel small { 
+      color: #5a627a;
+      font-size: 11px;
+    }
+    
+    .controlGroup { 
+      display: grid; 
+      gap: 10px; 
+    }
+    
+    .controlGroup label { 
+      font-size: 12px; 
+      color: #394056; 
+      display: grid; 
+      gap: 5px; 
+    }
+    
+    input[type="file"] { 
+      width: 100%; 
+      font-size: 11px; 
+      padding: 6px;
+      border: 1px solid #d7dbeb;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+    }
+    
+    .thumbs { 
+      display: grid; 
+      grid-template-columns: repeat(2, 1fr); 
+      gap: 8px; 
+      max-height: 200px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    
+    .thumb {
+      border: 1px solid #e6e8f0; 
+      border-radius: 10px; 
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .thumb:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      background: #f0f5ff;
+    }
+    
+    .thumb-icon {
+      font-size: 32px;
+    }
+    
+    .thumb .cap { 
+      font-size: 11px; 
+      color: #394056; 
+      word-break: break-all;
+      text-align: center;
+      font-weight: 500;
+    }
+    
+    .thumb .btn {
+      width: 100%;
+      padding: 6px;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    
+    .divider { 
+      border: 0; 
+      border-top: 1px solid #e6e8f0; 
+      margin: 10px 0; 
+    }
+    
+    /* Food Bar - Drag & Drop */
+    .food-bar {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 10px;
+      margin-top: 10px;
+      flex-shrink: 0;
+    }
+    
+    .food-title {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    
+    .food-items {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .food-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 12px;
+      background: white;
+      border: 2px solid #d7dbeb;
+      border-radius: 12px;
+      cursor: grab;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    
+    .food-item:active {
+      cursor: grabbing;
+    }
+    
+    .food-item.dragging {
+      opacity: 0.5;
+      cursor: grabbing;
+    }
+    
+    .food-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-color: #28a745;
+    }
+    
+    .food-emoji {
+      font-size: 24px;
+      pointer-events: none;
+    }
+    
+    .food-name {
+      font-size: 10px;
+      font-weight: 500;
+      pointer-events: none;
+    }
+    
+    /* Audio Player */
+    .audio-player {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 8px;
+    }
+    
+    .audio-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+    
+    .audio-info .track-name {
+      flex: 1;
+      font-weight: 500;
+      color: #1f2330;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .audio-controls {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .progress-bar {
+      flex: 1;
+      height: 3px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: #1f5cff;
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+    
+    .time-display {
+      font-size: 10px;
+      color: #666;
+      font-family: monospace;
+    }
+    
+    .volume-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+    
+    .volume-control span {
+      font-size: 11px;
+    }
+    
+    .volume-slider {
+      flex: 1;
+      height: 4px;
+      cursor: pointer;
+    }
+    
+    .stage:fullscreen {
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+      border: 0;
+      padding: 15px;
+    }
+    
+    .stage:fullscreen .canvasWrap {
+      flex: 1;
+    }
+    
+    .stage:fullscreen .food-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.85);
+      color: white;
+      z-index: 1000;
+      border-radius: 20px;
+    }
+    
+    .stage:fullscreen .food-item {
+      background: rgba(255,255,255,0.9);
+    }
+    
+    .bg-preview {
+      margin-top: 8px;
+      width: 100%;
+      height: 60px;
+      border-radius: 8px;
+      border: 1px solid #d7dbeb;
+      overflow: hidden;
+      background: #eaf6ff;
+    }
+    
+    .bg-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+    }
+    
+    @media (max-width: 800px) {
+      .app { 
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      body {
+        overflow: auto;
+      }
+      .stage, .panel {
+        min-height: 450px;
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>🎨 EcoCanvas: Plants & Animals Playground</h1>
+  <p>Upload background → upload plants & animals → drag/scale/rotate → drag food to animal → export PNG</p>
+</header>
+
+<div class="app">
+  <main class="stage" id="stage">
+    <div class="toolbar-row">
+      <div class="btn-group">
+        <button class="btn" id="btnClear">🗑️ Reset Canvas</button>
+        <button class="btn" id="btnSendBack">⬅️ Send Back</button>
+        <button class="btn" id="btnBringFront">➡️ Bring Front</button>
+        <button class="btn danger" id="btnDelete">❌ Delete Object</button>
+      </div>
+      <div class="btn-group">
+        <button class="btn" id="btnFullscreen">🖥️ Fullscreen</button>
+        <button class="btn primary" id="btnExport">📸 Export PNG</button>
+      </div>
+    </div>
+
+    <div class="canvasWrap" id="canvasWrap">
+      <canvas id="scene"></canvas>
+    </div>
+
+    <!-- Food Bar - Drag & Drop -->
+    <div class="food-bar">
+      <div class="food-title">🍽️ Drag food to animal</div>
+      <div class="food-items">
+        <div class="food-item" draggable="true" data-food="meat">
+          <div class="food-emoji">🥩</div>
+          <div class="food-name">Meat</div>
+        </div>
+        <div class="food-item" draggable="true" data-food="fruit">
+          <div class="food-emoji">🍎</div>
+          <div class="food-name">Fruit</div>
+        </div>
+        <div class="food-item" draggable="true" data-food="vegetable">
+          <div class="food-emoji">🥕</div>
+          <div class="food-name">Vegetable</div>
+        </div>
+        <div class="food-item" draggable="true" data-food="nuts">
+          <div class="food-emoji">🥜</div>
+          <div class="food-name">Nuts</div>
+        </div>
+        <div class="food-item" draggable="true" data-food="insect">
+          <div class="food-emoji">🐛</div>
+          <div class="food-name">Insect</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint">
+      💡 <span class="kbd">Click</span> select | <span class="kbd">Drag</span> move | 
+      <span class="kbd">Scroll</span> zoom | <span class="kbd">Shift+Scroll</span> rotate |
+      <span class="kbd">Drag food</span> then <span class="kbd">drop on animal</span>
+    </div>
+  </main>
+
+  <section class="panel">
+    <div class="panel-content">
+      <h2>📤 Background</h2>
+      <div class="controlGroup">
+        <label>
+          Upload background image
+          <input type="file" id="bgInput" accept="image/jpeg,image/png,image/jpg" />
+        </label>
+        <div class="bg-preview" id="bgPreview">
+          <div style="width:100%;height:100%;background:#87CEEB;display:flex;align-items:center;justify-content:center;font-size:11px;color:#666;">
+            🌈 No background
+          </div>
+        </div>
+        <button class="btn" id="btnResetBg" style="margin-top:5px;">🔄 Remove Background</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <h2>🌱 Plants</h2>
+      <label>
+        Upload plants (multi-file)
+        <input type="file" id="plantInput" accept="image/jpeg,image/png,image/jpg" multiple />
+      </label>
+      <div class="thumbs" id="uploadedPlants"></div>
+
+      <div class="divider"></div>
+
+      <h2>🐾 Animals</h2>
+      <label>
+        Upload animals (multi-file)
+        <input type="file" id="animalInput" accept="image/jpeg,image/png,image/jpg" multiple />
+      </label>
+      <div class="thumbs" id="uploadedAnimals"></div>
+
+      <div class="divider"></div>
+
+      <h2>🎵 Background Music</h2>
+      <label>
+        📁 Upload music (MP3/WAV/OGG)
+        <input type="file" id="audioInput" accept="audio/*" />
+      </label>
+      
+      <div class="audio-player" id="audioPlayer" style="display: none;">
+        <div class="audio-info">
+          <span>🎵</span>
+          <span class="track-name" id="trackName">-</span>
+        </div>
+        <div class="audio-controls">
+          <button class="btn" id="btnPlayPause" style="padding: 5px 10px;">▶️ Play</button>
+          <button class="btn" id="btnStop" style="padding: 5px 10px;">⏹️ Stop</button>
+          <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <span class="time-display" id="timeDisplay">00:00 / 00:00</span>
+        </div>
+        <div class="volume-control" style="margin-top: 8px;">
+          <span>🔊</span>
+          <input type="range" id="audioVolume" min="0" max="1" step="0.01" value="0.5" class="volume-slider" />
+          <label style="display:flex;align-items:center;gap:4px;">
+            <input type="checkbox" id="audioLoop" /> 🔁 Loop
+          </label>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<audio id="bgm" preload="auto"></audio>
+
+<script>
+(function() {
+    // ========== CANVAS SETUP ==========
+    const canvas = document.getElementById("scene");
+    const ctx = canvas.getContext("2d");
+    const stageEl = document.getElementById("stage");
+    const canvasWrap = document.getElementById("canvasWrap");
+    
+    let bgImage = null;
+    let objects = [];
+    let selectedIndex = -1;
+    let dragging = false;
+    let dragOffset = { x: 0, y: 0 };
+    
+    // ========== RESIZE CANVAS ==========
+    function resizeCanvasToFit() {
+      const container = canvasWrap;
+      const rect = container.getBoundingClientRect();
+      const width = Math.max(100, rect.width - 20);
+      const height = Math.max(100, rect.height - 20);
+      
+      if (width <= 0 || height <= 0) return;
+      
+      const oldWidth = canvas.width;
+      const oldHeight = canvas.height;
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      if (oldWidth > 0 && oldHeight > 0) {
+        const scaleX = canvas.width / oldWidth;
+        const scaleY = canvas.height / oldHeight;
+        
+        objects.forEach(o => {
+          o.x *= scaleX;
+          o.y *= scaleY;
+          o.w *= scaleX;
+          o.h *= scaleY;
+          if (o.targetX) o.targetX *= scaleX;
+          if (o.targetY) o.targetY *= scaleY;
+        });
+      }
+    }
+    
+    // ========== DRAG & DROP FOOD ==========
+    const foodItems = document.querySelectorAll('.food-item');
+    let dragDataType = null;
+    
+    foodItems.forEach(item => {
+      item.addEventListener('dragstart', (e) => {
+        dragDataType = e.target.closest('.food-item').dataset.food;
+        e.dataTransfer.setData('text/plain', dragDataType);
+        e.dataTransfer.effectAllowed = 'copy';
+        e.target.classList.add('dragging');
+        
+        // Create drag image
+        const dragIcon = document.createElement('div');
+        dragIcon.textContent = e.target.querySelector('.food-emoji').textContent;
+        dragIcon.style.fontSize = '40px';
+        dragIcon.style.position = 'absolute';
+        dragIcon.style.top = '-1000px';
+        document.body.appendChild(dragIcon);
+        e.dataTransfer.setDragImage(dragIcon, 20, 20);
+        setTimeout(() => document.body.removeChild(dragIcon), 0);
+      });
+      
+      item.addEventListener('dragend', (e) => {
+        e.target.classList.remove('dragging');
+        dragDataType = null;
+      });
+    });
+    
+    canvas.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+    });
+    
+    canvas.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const foodType = e.dataTransfer.getData('text/plain');
+      if (!foodType) return;
+      
+      // Get drop position relative to canvas
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mouseX = (e.clientX - rect.left) * scaleX;
+      const mouseY = (e.clientY - rect.top) * scaleY;
+      
+      // Find animal at drop position
+      let hitAnimal = null;
+      for (let i = objects.length - 1; i >= 0; i--) {
+        const obj = objects[i];
+        if (obj.type !== 'animal') continue;
+        
+        const dx = Math.abs(mouseX - obj.x);
+        const dy = Math.abs(mouseY - obj.y);
+        const halfW = obj.w * obj.scale / 2;
+        const halfH = obj.h * obj.scale / 2;
+        
+        if (dx < halfW && dy < halfH) {
+          hitAnimal = obj;
+          break;
+        }
+      }
+      
+      if (hitAnimal) {
+        feedAnimal(hitAnimal, foodType);
+      } else {
+        // Show temporary message
+        const originalHint = document.querySelector('.hint').innerHTML;
+        const hint = document.querySelector('.hint');
+        hint.innerHTML = '❌ Drag food to animal!';
+        setTimeout(() => {
+          if (hint.innerHTML === '❌ Drag food to animal!') {
+            hint.innerHTML = originalHint;
+          }
+        }, 1500);
+      }
+    });
+    
+    function feedAnimal(animal, foodType) {
+      const now = Date.now();
+      let foodName = '';
+      let emoji = '';
+      
+      switch(foodType) {
+        case 'meat':
+          foodName = 'meat';
+          emoji = '🥩';
+          break;
+        case 'fruit':
+          foodName = 'fruit';
+          emoji = '🍎';
+          break;
+        case 'vegetable':
+          foodName = 'vegetable';
+          emoji = '🥕';
+          break;
+        case 'nuts':
+          foodName = 'nuts';
+          emoji = '🥜';
+          break;
+        case 'insect':
+          foodName = 'insect';
+          emoji = '🐛';
+          break;
+        default:
+          foodName = 'food';
+          emoji = '🍽️';
+      }
+      
+      animal.bubbleText = `Yum yum! ${emoji} I love ${foodName}!`;
+      animal.bubbleUntil = now + 2500;
+      animal.hunger = 100;
+      
+      // Animal becomes happy and moves faster temporarily
+      animal.originalSpeed = animal.speed;
+      animal.speed = animal.speed * 1.5;
+      setTimeout(() => {
+        if (animal.speed > animal.originalSpeed) {
+          animal.speed = animal.originalSpeed;
+        }
+      }, 3000);
+      
+      // Show success feedback
+      const hint = document.querySelector('.hint');
+      const originalHint = hint.innerHTML;
+      hint.innerHTML = `✅ ${animal.name} ate ${foodName}! ${emoji}`;
+      setTimeout(() => {
+        if (hint.innerHTML === `✅ ${animal.name} ate ${foodName}! ${emoji}`) {
+          hint.innerHTML = originalHint;
+        }
+      }, 2000);
+    }
+    
+    // ========== BACKGROUND HANDLER ==========
+    const bgInput = document.getElementById("bgInput");
+    const bgPreview = document.getElementById("bgPreview");
+    const btnResetBg = document.getElementById("btnResetBg");
+    
+    function updateBgPreview() {
+      if (bgImage) {
+        const img = document.createElement("img");
+        img.src = bgImage.src;
+        bgPreview.innerHTML = '';
+        bgPreview.appendChild(img);
+      } else {
+        bgPreview.innerHTML = '<div style="width:100%;height:100%;background:#87CEEB;display:flex;align-items:center;justify-content:center;font-size:11px;color:#666;">🌈 No background</div>';
+      }
+    }
+    
+    bgInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        bgImage = await fileToImage(file);
+        updateBgPreview();
+      } catch(err) {
+        console.error("Failed to upload background:", err);
+        alert("Failed to upload background");
+      }
+    });
+    
+    btnResetBg.addEventListener("click", () => {
+      bgImage = null;
+      bgInput.value = '';
+      updateBgPreview();
+    });
+    
+    // ========== UPLOAD HANDLERS ==========
+    let plantImages = [];
+    let animalImages = [];
+    
+    const plantInput = document.getElementById("plantInput");
+    const animalInput = document.getElementById("animalInput");
+    const uploadedPlantsDiv = document.getElementById("uploadedPlants");
+    const uploadedAnimalsDiv = document.getElementById("uploadedAnimals");
+    
+    function fileToImage(file) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          resolve(img);
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error("Failed to load image"));
+        };
+        img.src = url;
+      });
+    }
+    
+    plantInput.addEventListener("change", async (e) => {
+      const files = Array.from(e.target.files);
+      if (!files.length) return;
+      
+      try {
+        for (const file of files) {
+          const img = await fileToImage(file);
+          plantImages.push({ file, img, fileName: file.name });
+        }
+        renderPlantThumbs();
+      } catch(err) {
+        console.error("Failed to upload plants:", err);
+        alert("Failed to upload plants: " + err.message);
+      }
+    });
+    
+    animalInput.addEventListener("change", async (e) => {
+      const files = Array.from(e.target.files);
+      if (!files.length) return;
+      
+      try {
+        for (const file of files) {
+          const img = await fileToImage(file);
+          animalImages.push({ file, img, fileName: file.name });
+        }
+        renderAnimalThumbs();
+      } catch(err) {
+        console.error("Failed to upload animals:", err);
+        alert("Failed to upload animals: " + err.message);
+      }
+    });
+    
+    function baseName(filename) {
+      return filename.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ").substring(0, 30);
+    }
+    
+    function renderPlantThumbs() {
+      uploadedPlantsDiv.innerHTML = "";
+      if (plantImages.length === 0) {
+        uploadedPlantsDiv.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #999; padding: 20px;">🌱 No plants uploaded</div>';
+        return;
+      }
+      
+      for (const item of plantImages) {
+        const div = document.createElement("div");
+        div.className = "thumb";
+        
+        const icon = document.createElement("div");
+        icon.className = "thumb-icon";
+        icon.textContent = "🌱";
+        
+        const name = document.createElement("div");
+        name.className = "cap";
+        name.textContent = baseName(item.fileName);
+        
+        const btnAdd = document.createElement("button");
+        btnAdd.className = "btn";
+        btnAdd.textContent = "Plant";
+        btnAdd.onclick = () => addPlant(item.img);
+        
+        div.appendChild(icon);
+        div.appendChild(name);
+        div.appendChild(btnAdd);
+        uploadedPlantsDiv.appendChild(div);
+      }
+    }
+    
+    function renderAnimalThumbs() {
+      uploadedAnimalsDiv.innerHTML = "";
+      if (animalImages.length === 0) {
+        uploadedAnimalsDiv.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #999; padding: 20px;">🐾 No animals uploaded</div>';
+        return;
+      }
+      
+      for (const item of animalImages) {
+        const div = document.createElement("div");
+        div.className = "thumb";
+        
+        const icon = document.createElement("div");
+        icon.className = "thumb-icon";
+        icon.textContent = "🐾";
+        
+        const name = document.createElement("div");
+        name.className = "cap";
+        name.textContent = baseName(item.fileName);
+        
+        const btnAdd = document.createElement("button");
+        btnAdd.className = "btn";
+        btnAdd.textContent = "Add";
+        btnAdd.onclick = () => addAnimal(item.img, baseName(item.fileName));
+        
+        div.appendChild(icon);
+        div.appendChild(name);
+        div.appendChild(btnAdd);
+        uploadedAnimalsDiv.appendChild(div);
+      }
+    }
+    
+    // ========== ADD OBJECTS ==========
+    function addPlant(img) {
+      const maxSize = 160;
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+      const w = img.width * scale;
+      const h = img.height * scale;
+      
+      objects.push({
+        type: "plant",
+        img: img,
+        x: canvas.width / 2,
+        y: canvas.height * 0.7,
+        scale: 1,
+        rot: 0,
+        w: w,
+        h: h
+      });
+      selectedIndex = objects.length - 1;
+    }
+    
+    function addAnimal(img, name) {
+      const maxSize = 120;
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+      const w = img.width * scale;
+      const h = img.height * scale;
+      
+      const minY = 60;
+      const maxY = canvas.height - 60;
+      
+      objects.push({
+        type: "animal",
+        name: name,
+        img: img,
+        x: rand(50, canvas.width - 50),
+        y: rand(minY, maxY),
+        scale: 1,
+        rot: 0,
+        w: w,
+        h: h,
+        speed: rand(60, 100),
+        direction: Math.random() < 0.5 ? 1 : -1,
+        bubbleText: "",
+        bubbleUntil: 0,
+        hunger: 100
+      });
+      selectedIndex = objects.length - 1;
+    }
+    
+    // ========== DRAWING FUNCTIONS ==========
+    function drawBackground() {
+      if (bgImage) {
+        const imgRatio = bgImage.width / bgImage.height;
+        const canvasRatio = canvas.width / canvas.height;
+        
+        let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+        
+        if (imgRatio > canvasRatio) {
+          drawHeight = canvas.height;
+          drawWidth = bgImage.width * (canvas.height / bgImage.height);
+          offsetX = (canvas.width - drawWidth) / 2;
+        } else {
+          drawWidth = canvas.width;
+          drawHeight = bgImage.height * (canvas.width / bgImage.width);
+          offsetY = (canvas.height - drawHeight) / 2;
+        }
+        
+        ctx.drawImage(bgImage, offsetX, offsetY, drawWidth, drawHeight);
+      } else {
+        // Solid blue background
+        ctx.fillStyle = "#87CEEB";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+    
+    function drawObjects() {
+      for (let i = 0; i < objects.length; i++) {
+        const obj = objects[i];
+        ctx.save();
+        ctx.translate(obj.x, obj.y);
+        
+        // Flip horizontally if direction is left (mirror effect)
+        if (obj.type === "animal" && obj.direction === -1) {
+          ctx.scale(-1, 1);
+        }
+        
+        ctx.rotate(obj.rot);
+        ctx.scale(obj.scale, obj.scale);
+        ctx.drawImage(obj.img, -obj.w/2, -obj.h/2, obj.w, obj.h);
+        
+        if (i === selectedIndex) {
+          ctx.strokeStyle = "#1f5cff";
+          ctx.lineWidth = 2.5;
+          ctx.strokeRect(-obj.w/2, -obj.h/2, obj.w, obj.h);
+        }
+        ctx.restore();
+        
+        if (obj.type === "animal" && obj.bubbleText && Date.now() < obj.bubbleUntil) {
+          drawSpeechBubble(obj.x, obj.y - (obj.h * obj.scale / 2) - 12, obj.bubbleText);
+        }
+        
+        // Draw hunger bar
+        if (obj.type === "animal" && obj.hunger !== undefined) {
+          const barWidth = obj.w * obj.scale;
+          const barHeight = 5;
+          const barX = obj.x - barWidth/2;
+          const barY = obj.y + obj.h * obj.scale / 2 + 5;
+          const hungerPercent = obj.hunger / 100;
+          
+          ctx.fillStyle = "rgba(0,0,0,0.3)";
+          ctx.fillRect(barX, barY, barWidth, barHeight);
+          ctx.fillStyle = hungerPercent > 0.6 ? "#28a745" : (hungerPercent > 0.3 ? "#ffc107" : "#dc3545");
+          ctx.fillRect(barX, barY, barWidth * hungerPercent, barHeight);
+        }
+      }
+    }
+    
+    function drawSpeechBubble(x, y, text) {
+      ctx.save();
+      ctx.font = "12px Arial";
+      const metrics = ctx.measureText(text);
+      const bubbleWidth = metrics.width + 14;
+      const bubbleHeight = 24;
+      
+      ctx.fillStyle = "white";
+      ctx.shadowBlur = 2;
+      ctx.shadowColor = "rgba(0,0,0,0.2)";
+      ctx.beginPath();
+      ctx.roundRect(x - bubbleWidth/2, y - bubbleHeight, bubbleWidth, bubbleHeight, 8);
+      ctx.fill();
+      ctx.fillStyle = "black";
+      ctx.shadowBlur = 0;
+      ctx.font = "12px Arial";
+      ctx.fillText(text, x - bubbleWidth/2 + 7, y - bubbleHeight + 16);
+      ctx.restore();
+    }
+    
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+      CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+        if (w < 2 * r) r = w / 2;
+        if (h < 2 * r) r = h / 2;
+        this.moveTo(x+r, y);
+        this.lineTo(x+w-r, y);
+        this.quadraticCurveTo(x+w, y, x+w, y+r);
+        this.lineTo(x+w, y+h-r);
+        this.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+        this.lineTo(x+r, y+h);
+        this.quadraticCurveTo(x, y+h, x, y+h-r);
+        this.lineTo(x, y+r);
+        this.quadraticCurveTo(x, y, x+r, y);
+        return this;
+      };
+    }
+    
+    // ========== ANIMAL MOVEMENT WITH MIRROR ==========
+    function updateAnimals() {
+      const now = Date.now();
+      const minY = 60;
+      const maxY = canvas.height - 60;
+      const margin = 30;
+      
+      for (const obj of objects) {
+        if (obj.type !== "animal") continue;
+        
+        // Move based on direction
+        obj.x += obj.speed * 0.016 * obj.direction;
+        
+        // Mirror when reaching edges
+        if (obj.x <= margin) {
+          obj.x = margin;
+          obj.direction = 1; // Turn right
+        } else if (obj.x >= canvas.width - margin) {
+          obj.x = canvas.width - margin;
+          obj.direction = -1; // Turn left
+        }
+        
+        // Keep Y within bounds
+        obj.y = clamp(obj.y, minY, maxY);
+        
+        // Random Y movement for natural look
+        if (Math.random() < 0.02) {
+          obj.y += (Math.random() - 0.5) * 15;
+          obj.y = clamp(obj.y, minY, maxY);
+        }
+        
+        // Decrease hunger
+        if (obj.hunger > 0) {
+          obj.hunger -= 0.08;
+          if (obj.hunger < 0) obj.hunger = 0;
+        }
+        
+        // Random chat when hungry
+        if (obj.hunger < 30 && Math.random() < 0.01 && !obj.bubbleText) {
+          const hungryPhrases = [`I'm hungry... 🍽️`, `Feed me please!`, `Any food?`, `My tummy is growling...`];
+          obj.bubbleText = hungryPhrases[Math.floor(Math.random() * hungryPhrases.length)];
+          obj.bubbleUntil = now + 2000;
+        } else if (Math.random() < 0.003 && !obj.bubbleText && obj.hunger > 50) {
+          const phrases = [`Hi! I'm ${obj.name} 🐾`, `Let's play! 🎮`, `What a sunny day! ☀️`, `Nice to meet you! 👋`];
+          obj.bubbleText = phrases[Math.floor(Math.random() * phrases.length)];
+          obj.bubbleUntil = now + 2000;
+        }
+        
+        if (obj.bubbleUntil && now > obj.bubbleUntil) {
+          obj.bubbleText = "";
+        }
+      }
+    }
+    
+    function rand(min, max) { return min + Math.random() * (max - min); }
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+    
+    // ========== INTERACTION ==========
+    function getMousePos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
+      };
+    }
+    
+    function hitTest(x, y) {
+      for (let i = objects.length - 1; i >= 0; i--) {
+        const obj = objects[i];
+        const dx = Math.abs(x - obj.x);
+        const dy = Math.abs(y - obj.y);
+        const halfW = obj.w * obj.scale / 2;
+        const halfH = obj.h * obj.scale / 2;
+        
+        if (dx < halfW && dy < halfH) {
+          return i;
+        }
+      }
+      return -1;
+    }
+    
+    canvas.addEventListener("pointerdown", (e) => {
+      const pos = getMousePos(e);
+      const idx = hitTest(pos.x, pos.y);
+      
+      if (idx >= 0) {
+        selectedIndex = idx;
+        dragging = true;
+        dragOffset.x = pos.x - objects[idx].x;
+        dragOffset.y = pos.y - objects[idx].y;
+        canvas.setPointerCapture(e.pointerId);
+      } else {
+        selectedIndex = -1;
+      }
+    });
+    
+    canvas.addEventListener("pointermove", (e) => {
+      if (!dragging || selectedIndex < 0) return;
+      const pos = getMousePos(e);
+      const obj = objects[selectedIndex];
+      obj.x = pos.x - dragOffset.x;
+      obj.y = pos.y - dragOffset.y;
+      obj.x = clamp(obj.x, 20, canvas.width - 20);
+      obj.y = clamp(obj.y, 30, canvas.height - 30);
+    });
+    
+    canvas.addEventListener("pointerup", () => {
+      dragging = false;
+    });
+    
+    canvas.addEventListener("wheel", (e) => {
+      if (selectedIndex < 0) return;
+      e.preventDefault();
+      const obj = objects[selectedIndex];
+      if (e.shiftKey) {
+        obj.rot += e.deltaY > 0 ? 0.1 : -0.1;
+      } else {
+        obj.scale *= e.deltaY > 0 ? 0.95 : 1.05;
+        obj.scale = clamp(obj.scale, 0.2, 3);
+      }
+    }, { passive: false });
+    
+    // ========== BUTTON HANDLERS ==========
+    document.getElementById("btnDelete").addEventListener("click", () => {
+      if (selectedIndex >= 0) {
+        objects.splice(selectedIndex, 1);
+        selectedIndex = -1;
+      }
+    });
+    
+    document.getElementById("btnSendBack").addEventListener("click", () => {
+      if (selectedIndex > 0) {
+        const obj = objects.splice(selectedIndex, 1)[0];
+        objects.unshift(obj);
+        selectedIndex = 0;
+      }
+    });
+    
+    document.getElementById("btnBringFront").addEventListener("click", () => {
+      if (selectedIndex >= 0 && selectedIndex < objects.length - 1) {
+        const obj = objects.splice(selectedIndex, 1)[0];
+        objects.push(obj);
+        selectedIndex = objects.length - 1;
+      }
+    });
+    
+    document.getElementById("btnClear").addEventListener("click", () => {
+      objects = [];
+      selectedIndex = -1;
+    });
+    
+    document.getElementById("btnExport").addEventListener("click", () => {
+      const link = document.createElement("a");
+      link.download = "playground.png";
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+    
+    document.getElementById("btnFullscreen").addEventListener("click", async () => {
+      if (!document.fullscreenElement) {
+        await stageEl.requestFullscreen();
+        setTimeout(resizeCanvasToFit, 100);
+      } else {
+        await document.exitFullscreen();
+        setTimeout(resizeCanvasToFit, 100);
+      }
+    });
+    
+    // ========== AUDIO PLAYER ==========
+    const bgm = document.getElementById("bgm");
+    const audioInputEl = document.getElementById("audioInput");
+    const audioPlayer = document.getElementById("audioPlayer");
+    const trackName = document.getElementById("trackName");
+    const btnPlayPause = document.getElementById("btnPlayPause");
+    const btnStop = document.getElementById("btnStop");
+    const progressBar = document.getElementById("progressBar");
+    const progressFill = document.getElementById("progressFill");
+    const timeDisplay = document.getElementById("timeDisplay");
+    const audioVolume = document.getElementById("audioVolume");
+    const audioLoop = document.getElementById("audioLoop");
+    
+    let currentAudioUrl = null;
+    let isPlaying = false;
+    let progressInterval = null;
+    
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    
+    function updateProgress() {
+      if (bgm.duration && !isNaN(bgm.duration)) {
+        const percent = (bgm.currentTime / bgm.duration) * 100;
+        progressFill.style.width = `${percent}%`;
+        timeDisplay.textContent = `${formatTime(bgm.currentTime)} / ${formatTime(bgm.duration)}`;
+      }
+    }
+    
+    function startProgressUpdate() {
+      if (progressInterval) clearInterval(progressInterval);
+      progressInterval = setInterval(updateProgress, 100);
+    }
+    
+    function stopProgressUpdate() {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
+    }
+    
+    function updatePlayPauseButton() {
+      if (isPlaying) {
+        btnPlayPause.textContent = "⏸️ Pause";
+      } else {
+        btnPlayPause.textContent = "▶️ Play";
+      }
+    }
+    
+    async function playAudio() {
+      try {
+        await bgm.play();
+        isPlaying = true;
+        updatePlayPauseButton();
+        startProgressUpdate();
+      } catch (e) {
+        console.warn("Play blocked by browser:", e);
+        alert("Browser blocked autoplay. Please click play manually.");
+        isPlaying = false;
+        updatePlayPauseButton();
+      }
+    }
+    
+    function pauseAudio() {
+      bgm.pause();
+      isPlaying = false;
+      updatePlayPauseButton();
+      stopProgressUpdate();
+    }
+    
+    btnPlayPause.addEventListener("click", () => {
+      if (!bgm.src) {
+        alert("Please upload music first");
+        return;
+      }
+      
+      if (isPlaying) {
+        pauseAudio();
+      } else {
+        playAudio();
+      }
+    });
+    
+    btnStop.addEventListener("click", () => {
+      if (!bgm.src) return;
+      bgm.pause();
+      bgm.currentTime = 0;
+      isPlaying = false;
+      updatePlayPauseButton();
+      updateProgress();
+      stopProgressUpdate();
+    });
+    
+    progressBar.addEventListener("click", (e) => {
+      if (!bgm.src || !bgm.duration) return;
+      const rect = progressBar.getBoundingClientRect();
+      const percent = (e.clientX - rect.left) / rect.width;
+      bgm.currentTime = percent * bgm.duration;
+      updateProgress();
+    });
+    
+    audioVolume.addEventListener("input", () => {
+      bgm.volume = parseFloat(audioVolume.value);
+    });
+    
+    audioLoop.addEventListener("change", () => {
+      bgm.loop = audioLoop.checked;
+    });
+    
+    audioInputEl.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      if (currentAudioUrl) {
+        URL.revokeObjectURL(currentAudioUrl);
+      }
+      
+      currentAudioUrl = URL.createObjectURL(file);
+      bgm.src = currentAudioUrl;
+      bgm.load();
+      bgm.volume = parseFloat(audioVolume.value);
+      bgm.loop = audioLoop.checked;
+      
+      trackName.textContent = file.name.replace(/\.[^/.]+$/, "").substring(0, 30);
+      audioPlayer.style.display = "block";
+      
+      bgm.addEventListener("loadedmetadata", () => {
+        timeDisplay.textContent = `00:00 / ${formatTime(bgm.duration)}`;
+        updateProgress();
+      });
+      
+      bgm.addEventListener("ended", () => {
+        if (!audioLoop.checked) {
+          isPlaying = false;
+          updatePlayPauseButton();
+          stopProgressUpdate();
+        }
+      });
+      
+      bgm.addEventListener("play", () => {
+        isPlaying = true;
+        updatePlayPauseButton();
+        startProgressUpdate();
+      });
+      
+      bgm.addEventListener("pause", () => {
+        isPlaying = false;
+        updatePlayPauseButton();
+        stopProgressUpdate();
+      });
+    });
+    
+    // ========== RESIZE OBSERVER ==========
+    const resizeObserver = new ResizeObserver(() => {
+      resizeCanvasToFit();
+    });
+    resizeObserver.observe(canvasWrap);
+    
+    window.addEventListener("resize", () => {
+      setTimeout(resizeCanvasToFit, 100);
+    });
+    
+    // ========== ANIMATION LOOP ==========
+    function animate() {
+      drawBackground();
+      drawObjects();
+      requestAnimationFrame(animate);
+    }
+    
+    // Initialize
+    setTimeout(resizeCanvasToFit, 100);
+    animate();
+    
+    setInterval(() => {
+      updateAnimals();
+    }, 50);
+    
+    console.log("✅ App ready! Drag food to animal to feed.");
+})();
+</script>
+</body>
+</html>
